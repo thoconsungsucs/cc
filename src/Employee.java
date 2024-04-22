@@ -1,9 +1,15 @@
-import java.security.Provider;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Scanner;
+
 
 public class Employee extends Person {
     private boolean status;
-//    private List<Service> task;
+    private List<Integer> taskid;
     private int unitTask;
     private double salary;
     private String job;
@@ -13,6 +19,7 @@ public class Employee extends Person {
         this.unitTask = unitTask;
         this.salary = salary;
         this.job = job;
+        this.taskid = new ArrayList<>();
     }
     public boolean isStatus() {
         return status;
@@ -39,13 +46,38 @@ public class Employee extends Person {
         this.job = job;
     }
 
-    @Override
+    public void chooseTask(int id) {
+        Boolean flag = true;
+        while (flag) {
+            Scanner input = new Scanner(System.in);
+            System.out.println("Enter ID: ");
+            id = input.nextInt();
+            ConnectDatabase db = new ConnectDatabase();
+            Connection connection = db.ConnectDatabase();
+            String sql = "SELECT id FROM services";
+            try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
+                try (ResultSet rs = pstmt.executeQuery()) {
+                    this.taskid = new ArrayList<>();
+                    while (rs.next()) {
+                        id = rs.getInt("id");
+                        this.taskid.add(id);
+                    }
+                    System.out.println("Do you want continue: ");
+                    flag = input.nextBoolean();
+                }
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
+            }
+        }
+    }
+            @Override
     public String toString() {
         return "Employee{" +
                 super.toString()+
                 "status=" + status +
                 ", unitTask=" + unitTask +
                 ", salary=" + salary +
+                ", taskid=" + taskid +
                 ", job='" + job + '\'' +
                 '}';
     }
