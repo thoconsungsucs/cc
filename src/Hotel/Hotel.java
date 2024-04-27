@@ -1,13 +1,12 @@
-package Hotel;
+package Person;
 
-import Person.Customer;
-import Person.Employee;
-import Room.Room;
+import Room.*;
 import Service.Service;
-
+import java.util.*;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Scanner;
+
+import ConnectDatabase.ConnectDatabase;
 
 public class Hotel {
     private String name;
@@ -17,14 +16,18 @@ public class Hotel {
     List<Employee> employees;
     List<Service> services;
     List<Service> tasks;
+    ConnectDatabase _connectDatabase;
 
-    public Hotel(String name, String address) {
+    public Hotel(String name, String address, ConnectDatabase connectDatabase) {
+        _connectDatabase = connectDatabase;
         this.name = name;
         this.address = address;
-        customers = new ArrayList<>();
-        employees = new ArrayList<>();
-        services = new ArrayList<>();
-        tasks = new ArrayList<>();
+        rooms = _connectDatabase.queryRooms();
+        customers = _connectDatabase.queryCustomers();
+        employees = _connectDatabase.queryEmployee();
+        services = _connectDatabase.queryServices();
+        tasks = _connectDatabase.queryTask();
+        ;
     }
 
     public String getName() {
@@ -43,12 +46,6 @@ public class Hotel {
         return this.employees;
     }
 
-    public void printEmployee() {
-        for (Employee employee : employees) {
-            System.out.println(employee.toString());
-        }
-    }
-
     public List<Service> getServices() {
         return this.services;
     }
@@ -63,36 +60,15 @@ public class Hotel {
         // Add customer
         System.out.println("Add customer:");
         Scanner scan = new Scanner(System.in);
-        System.out.println("Enter customer Id: ");
-        int id = scan.nextInt();
         System.out.println("Enter customer name: ");
         String name = scan.nextLine();
-        System.out.println("Enter customer gender(true for male, false for female): ");
-        Boolean gender = scan.nextBoolean();
+        System.out.println("Enter customer gender: ");
+        String gender = scan.nextLine();
         System.out.println("Enter customer phone: ");
         String phone = scan.nextLine();
-        Customer customer = new Customer(id,name, gender, phone);
+        int id = connectDatabase.insertCustomer(name, gender, phone);
+        Customer customer = new Customer(id, name, gender, phone);
         customers.add(customer);
-
-        // Add room
-        System.out.println("Booking room");
-        printRooms();
-
-        System.out.println("Enter room number: ");
-        Room choosenRoom = rooms.stream().filter(r -> r.getId() == scan.nextInt()).findFirst().orElse(null);
-        if (choosenRoom == null) {
-            System.out.println("Room not found");
-            return;
-        }
-
-        if (choosenRoom.isAvailable()) {
-            System.out.println("Room is already booked");
-            return;
-        }
-
-        choosenRoom.setAvailable(false);
-        customer.bookRoom(choosenRoom);
-        System.out.println("Room booked successfully");
 
     }
 
@@ -101,50 +77,53 @@ public class Hotel {
 
     }
 
-//    public void addRoom() {
-//        Scanner scan = new Scanner(System.in);
-//        // Add room
-//        System.out.println("Add room:");
-//        System.out.println("Choose room type: 1. Standard 2. Deluxe 3. Suite");
-//        int choice = scan.nextInt();
-//        scan.nextLine();
-//
-//        System.out.println("Enter room name: ");
-//        String name = scan.nextLine();
-//        System.out.println("Enter room price: ");
-//        double price = scan.nextDouble();
-//        System.out.println("Enter number of beds: ");
-//        int beds = scan.nextInt();
-//        scan.nextLine();
-//
-//        switch (choice) {
-//            case 1:
-//                System.out.println("Is room having shower? 1. Yes 2. No ");
-//                int shower = scan.nextInt();
-//                scan.nextLine();
-//                StandardRoom newSR = new StandardRoom(name, price, beds, shower == 1);
-//                this.addRoom(newSR);
-//                break;
-//
-//            case 2:
-//                System.out.println("Enter furniture:");
-//                String furniture = scan.nextLine();
-//                DeluxeRoom newDR = new DeluxeRoom(name, price, beds, furniture);
-//                this.addRoom(newDR);
-//                break;
-//
-//            case 3:
-//                System.out.println("Enter electric devices:");
-//                String devices = scan.nextLine();
-//                SuiteRoom newSR = new SuiteRoom(name, price, beds, devices);
-//                this.addRoom(newSR);
-//                break;
-//
-//            default:
-//                System.out.println("Invalid choice");
-//                break;
-//        }
-//    }
+    public void addRoom() {
+        Scanner scan = new Scanner(System.in);
+        // Add room
+        System.out.println("Add room:");
+        System.out.println("Choose room type: 1. Standard 2. Deluxe 3. Suite");
+        int choice = scan.nextInt();
+        scan.nextLine();
+
+        System.out.println("Enter room name: ");
+        String name = scan.nextLine();
+        System.out.println("Enter room price: ");
+        double price = scan.nextDouble();
+        System.out.println("Enter number of beds: ");
+        int beds = scan.nextInt();
+        scan.nextLine();
+        int id = _connectDatabase.insertRoom(name, price, beds);
+        switch (choice) {
+            case 1:
+                System.out.println("Is room having shower? 1. Yes 2. No ");
+                int shower = scan.nextInt();
+                scan.nextLine();
+                StandardRoom newSR = new StandardRoom(id, name, price, beds, shower == 1);
+                this.addRoom(newSR);
+                _connectDatabase.insertStandardRoom(id, shower == 1);
+                break;
+
+            case 2:
+                System.out.println("Enter furniture:");
+                String furniture = scan.nextLine();
+                DeluxeRoom newDR = new DeluxeRoom(id, name, price, beds, furniture);
+                _connectDatabase.insertDeluxeRoom(id, furniture);
+                this.addRoom(newDR);
+                break;
+
+            case 3:
+                System.out.println("Enter electric devices:");
+                String devices = scan.nextLine();
+                SuiteRoom newSR = new SuiteRoom(id, name, price, beds, devices);
+                _connectDatabase.insertSuiteRoom(id, devices);
+                this.addRoom(newSR);
+                break;
+
+            default:
+                System.out.println("Invalid choice");
+                break;
+        }
+    }
 
     public void removeRoom() {
         Scanner scan = new Scanner(System.in);
@@ -156,6 +135,7 @@ public class Hotel {
             return;
         }
         rooms.remove(room);
+        _connectDatabase.deleteRoom(id);
         System.out.println("Room removed successfully");
 
     }
@@ -187,21 +167,18 @@ public class Hotel {
         return rooms.stream().filter(r -> r.isAvailable()).toList();
     }
 
-    public void addService(Service service) {
-        services.add(service);
+
+    public void printAllBill() {
+        customers.stream().forEach(c -> System.out.println(c.printBill()));
+        double total = customers.stream().mapToDouble(c -> c.printBill()).sum();
+        System.out.println("Total bill: " + total);
     }
 
-//    public void printAllBill() {
-//        customers.stream().forEach(c -> System.out.println(c.printBill()));
-//        double total = customers.stream().mapToDouble(c -> c.printBill()).sum();
-//        System.out.println("Total bill: " + total);
-//    }
-//
-//    public void caculate() {
-//        double salary = employees.stream().mapToDouble(e -> e.getSalary()).sum();
-//        double bills = customers.stream().mapToDouble(c -> c.printBill()).sum();
-//        double profit = bills - salary;
-//        System.out.println("Profit: " + profit);
-//    }
+    public void caculate() {
+        double salary = employees.stream().mapToDouble(e -> e.getSalary()).sum();
+        double bills = customers.stream().mapToDouble(c -> c.printBill()).sum();
+        double profit = bills - salary;
+        System.out.println("Profit: " + profit);
+    }
 
 }
