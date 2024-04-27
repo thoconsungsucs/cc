@@ -1,6 +1,9 @@
-import java.security.Provider.Service;
+package Person;
+import Room.*;
+import Service.Service;
+import java.util.*;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Scanner;
 
 public class Hotel {
     private String name;
@@ -10,6 +13,15 @@ public class Hotel {
     List<Employee> employees;
     List<Service> services;
     List<Service> tasks;
+
+    public Hotel(String name, String address) {
+        this.name = name;
+        this.address = address;
+        customers = new ArrayList<>();
+        employees = new ArrayList<>();
+        services = new ArrayList<>();
+        tasks = new ArrayList<>();
+    }
 
     public String getName() {
         return this.name;
@@ -67,7 +79,7 @@ public class Hotel {
         }
 
         choosenRoom.setAvailable(false);
-        customer.addRoom(choosenRoom);
+        customer.bookRoom(choosenRoom);
         System.out.println("Room booked successfully");
 
     }
@@ -99,21 +111,21 @@ public class Hotel {
                 int shower = scan.nextInt();
                 scan.nextLine();
                 StandardRoom newSR = new StandardRoom(name, price, beds, shower == 1);
-                hotel.addRoom(newSR);
+                this.addRoom(newSR);
                 break;
 
             case 2:
                 System.out.println("Enter furniture:");
                 String furniture = scan.nextLine();
                 DeluxeRoom newDR = new DeluxeRoom(name, price, beds, furniture);
-                hotel.addRoom(newDR);
+                this.addRoom(newDR);
                 break;
 
             case 3:
                 System.out.println("Enter electric devices:");
                 String devices = scan.nextLine();
                 SuiteRoom newSR = new SuiteRoom(name, price, beds, devices);
-                hotel.addRoom(newSR);
+                this.addRoom(newSR);
                 break;
 
             default:
@@ -144,18 +156,18 @@ public class Hotel {
         Scanner scan = new Scanner(System.in);
         System.out.println("Enter customer id: ");
         int id = scan.nextInt();
-        Customer customer = customers.stream().filter(c -> c.getId() == id).findFirst().orElse(null);
+        Customer customer = customers.stream().filter(c -> c.getID() == id).findFirst().orElse(null);
         if (customer == null) {
             System.out.println("Customer not found");
             return;
         }
-        customer.getRooms().stream().forEach(r -> r.setAvailable(true));
+        customer.getBookedRoom().stream().forEach(r -> r.setAvailable(true));
         customers.remove(customer);
         System.out.println("Room checked out successfully");
     }
 
     public void checkOut(Customer customer) {
-        customer.getRooms().stream().forEach(r -> r.setAvailable(true));
+        customer.getBookedRoom().stream().forEach(r -> r.setAvailable(true));
         customers.remove(customer);
     }
 
@@ -168,22 +180,16 @@ public class Hotel {
     }
 
     public void printAllBill() {
-        customers.stream().forEach(c -> System.out.println(c.getBill()));
-        double total = customers.stream().mapToDouble(c -> c.getBill()).sum();
+        customers.stream().forEach(c -> System.out.println(c.printBill()));
+        double total = customers.stream().mapToDouble(c -> c.printBill()).sum();
         System.out.println("Total bill: " + total);
     }
 
     public void caculate() {
         double salary = employees.stream().mapToDouble(e -> e.getSalary()).sum();
-        double bills = customers.stream().mapToDouble(c -> c.getBill()).sum();
+        double bills = customers.stream().mapToDouble(c -> c.printBill()).sum();
         double profit = bills - salary;
         System.out.println("Profit: " + profit);
     }
 
-    public static void main(String[] args) {
-        Scanner scan = new Scanner(System.in);
-        System.out.println("Hotel management system");
-        Hotel hotel = new Hotel();
-
-    }
 }

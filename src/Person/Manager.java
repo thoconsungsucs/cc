@@ -1,10 +1,14 @@
-import java.sql.*;
-import java.util.ArrayList;
-import java.util.List;
+package Person;
+import ConnectDatabase.ConnectDatabase;
+import Service.Service;
+
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
 import java.util.Scanner;
 
-public class Manager extends Employee{
-    public Manager(int ID, String name, boolean gender, String phone,boolean status, int unitTask, double salary, String job){
+public class Manager extends Employee {
+    public Manager(int ID, String name, boolean gender, String phone, boolean status, int unitTask, double salary, String job){
         super(ID, name, gender, phone, status, unitTask, salary, job);
     }
     public void addEmployeeIntoDatabase(Hotel hotel) throws SQLException {
@@ -26,13 +30,10 @@ public class Manager extends Employee{
         System.out.println("Enter job");
         String job = scanner.next();
         Employee newemployee = new Employee(ID, name, gender, phone, status, unitTask, salary, job);
-        List<Employee> employees = new ArrayList<Employee>();
-        employees.add(newemployee);
-        hotel.setEmployees(employees);
-        Statement statement = null;
+        hotel.employees.add(newemployee);
         ConnectDatabase connector = new ConnectDatabase();
         Connection connection = connector.ConnectDatabase();
-        String sql = "INSERT INTO employee_information (ID, Name, Gender, Phone, Status, Unit_Task, Salary, Job)" +
+        String sql = "INSERT INTO employees (employee_id, Name, Gender, Phone, Status, Unit_Task, Salary, Job)" +
         "VALUES (?,?,?,?,?,?,?,?)";
         PreparedStatement state = connection.prepareStatement(sql);
         state.setInt(1,ID);
@@ -84,4 +85,46 @@ public class Manager extends Employee{
 
     }
 
+    public void addService(Hotel hotel) throws SQLException {
+        Scanner scanner = new Scanner(System.in);
+        System.out.println("Enter ID Service");
+        int ID = scanner.nextInt();
+        System.out.println("Enter Name Service");
+        String name = scanner.next();
+        Service s = new Service();
+        s.setName(name);
+        s.setId(ID);
+        hotel.services.add(s);
+        ConnectDatabase db = new ConnectDatabase();
+        Connection connection = db.ConnectDatabase();
+        String sql = "INSERT INTO service (id, name) VALUES (?,?)";
+        PreparedStatement statement = connection.prepareStatement(sql);
+        statement.setInt(1,ID);
+        statement.setString(2, name);
+        statement.executeUpdate();
+        System.out.println("Service added successfully!");
+    }
+
+    public void removeService(Hotel hotel) throws SQLException {
+        Scanner scanner = new Scanner(System.in);
+        System.out.println("Enter ID Service");
+        int ID = scanner.nextInt();
+        for(Service s : hotel.services) {
+            if(s.getId() == ID) {
+                System.out.println("Service removed successfully!");
+                hotel.services.remove(ID);
+            }
+            else {
+                System.out.println("Service not found!");
+                return;
+            }
+        }
+        ConnectDatabase db = new ConnectDatabase();
+        Connection connection = db.ConnectDatabase();
+        String sql = "DELETE FROM service WHERE ID = ?";
+        PreparedStatement statement = connection.prepareStatement(sql);
+        statement.setInt(1,ID);
+        statement.executeUpdate();
+        System.out.println("Service removed successfully!");
+    }
 }
