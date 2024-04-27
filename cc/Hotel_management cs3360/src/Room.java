@@ -60,7 +60,30 @@ public abstract class Room {
         this.check_in_date = check_in_date;
     }
     public String getCheck_out_date() {
+        Connection connection = null;
+        try {
+            ConnectDatabase db = new ConnectDatabase();
+            connection = db.ConnectToDatabase();
+            String query = "SELECT check_out_date FROM booking_rooms WHERE room_id = ?;";
+            try (PreparedStatement preparedStatement = connection.prepareStatement(query)) {
+                preparedStatement.setInt(1, this.getRoom_id());
+                ResultSet resultSet = preparedStatement.executeQuery();
+                if (resultSet.next()) {
+                    this.check_out_date = resultSet.getString("check_out_date");
+                }
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
+            }
         return check_out_date;
+        } finally {
+            if (connection != null) {
+                try {
+                    connection.close();
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
     }
     public void setCheck_out_date(String check_out_date) {
         this.check_out_date = check_out_date;
@@ -105,10 +128,12 @@ public abstract class Room {
         try {
             ConnectDatabase db = new ConnectDatabase();
             connection = db.ConnectToDatabase();
-            String query = "INSERT INTO booking_services (booking_room_id, booking_service_id, price) VALUES(?, ?, ?);";
+            String query = "INSERT INTO booking_services (booking_room_id,services, price) VALUES( ?, ?, ?);";
             try (PreparedStatement preparedStatement = connection.prepareStatement(query)) {
                 preparedStatement.setInt(1, this.getRoom_id());
-                preparedStatement.setInt(2, service.getId());
+                preparedStatement.setString(2, service.getName());
+                
+                
                 preparedStatement.setDouble(3, service.getPrice());
                 preparedStatement.executeUpdate();
             } catch (SQLException e) {

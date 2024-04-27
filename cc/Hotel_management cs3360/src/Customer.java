@@ -100,6 +100,8 @@ public class Customer extends Person {
         customer.bookRoom(room1);
         Service service1 = new Service(1, "Breakfast", 10);
         customer.getBookedRooms().get(0).bookService(service1);
+        String lol = customer.getBookedRooms().get(0).getCheck_out_date();
+        System.out.println(lol);
     }
 
 
