@@ -1,11 +1,14 @@
 import java.sql.SQLException;
-
+import Person.*;
+import ConnectDatabase.*;
+import Room.*;
+import Service.*;
+import Hotel.*;
 public class Main {
     public static void main(String[] args) throws SQLException {
         Manager newManager = new Manager(1, "duc",true, "123",true,1, 100, "manager");
         Hotel h = new Hotel("Threeboys","Ha Noi");
-      //  newManager.addEmployeeIntoDatabase(h);
-       // newManager.addService(h);
-        newManager.removeService(h);
+        newManager.addEmployee(h);
+        h.printEmployee();
     }
 }

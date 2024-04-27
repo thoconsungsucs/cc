@@ -23,8 +23,10 @@ public class StandardRoom extends Room {
     public void setHavingShower(boolean havingShower) {
         this.havingShower = havingShower;
     };
+
     public double calculatePrice(){
-        return this.getNumOfDay()*this.getPrice();
+        int showerPrice = this.isHavingShower() ? 50 : 0;
+        return this.getNumOfDay() * (this.getPrice() + this.getNumOfBed() * 50 + showerPrice);
     }
 
     

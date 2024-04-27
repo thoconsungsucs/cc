@@ -36,6 +36,6 @@ public class DeluxeRoom extends Room{
     }
 
     public double calculatePrice(){
-        return this.getNumOfDay()*this.getPrice();
+        return this.getNumOfDay()*this.getPrice() + this.numOfUnit*100;
     }
 }

@@ -10,14 +10,10 @@ public class Customer extends Person {
     private List<Room> bookedRoom;
     private List<Service> Services;
     private int rate;
-    public Customer(int ID, String name, boolean gender, String phone, int rate){
+    public Customer(int ID, String name, boolean gender, String phone){
         super(ID, name, gender, phone);
-        this.rate = rate;
         bookedRoom = new ArrayList<>();
         Services =  new ArrayList<>();
-    }
-    public Customer( String name, boolean gender, String phone){
-
     }
     public List<Room> getBookedRoom(){
         return bookedRoom;
