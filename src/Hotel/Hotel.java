@@ -58,8 +58,7 @@ public class Hotel {
         rooms.forEach(r -> System.out.println(r.toString()));
     }
 
-    public void booking() {
-
+    public void addCustomer() {
         // Add customer
         System.out.println("Add customer:");
         Scanner scan = new Scanner(System.in);
@@ -73,32 +72,10 @@ public class Hotel {
         String phone = scan.nextLine();
         Customer customer = new Customer(id,name, gender, phone);
         customers.add(customer);
-
-        // Add room
-        System.out.println("Booking room");
-        printRooms();
-
-        System.out.println("Enter room number: ");
-        Room choosenRoom = rooms.stream().filter(r -> r.getId() == scan.nextInt()).findFirst().orElse(null);
-        if (choosenRoom == null) {
-            System.out.println("Room not found");
-            return;
-        }
-
-        if (choosenRoom.isAvailable()) {
-            System.out.println("Room is already booked");
-            return;
-        }
-
-        choosenRoom.setAvailable(false);
-        customer.bookRoom(choosenRoom);
-        System.out.println("Room booked successfully");
-
     }
 
     public void addRoom(Room room) {
         rooms.add(room);
-
     }
 
 //    public void addRoom() {
@@ -191,17 +168,17 @@ public class Hotel {
         services.add(service);
     }
 
-//    public void printAllBill() {
-//        customers.stream().forEach(c -> System.out.println(c.printBill()));
-//        double total = customers.stream().mapToDouble(c -> c.printBill()).sum();
-//        System.out.println("Total bill: " + total);
-//    }
-//
-//    public void caculate() {
-//        double salary = employees.stream().mapToDouble(e -> e.getSalary()).sum();
-//        double bills = customers.stream().mapToDouble(c -> c.printBill()).sum();
-//        double profit = bills - salary;
-//        System.out.println("Profit: " + profit);
-//    }
+    public void printAllBill() {
+        customers.stream().forEach(c -> System.out.println(c.printBill()));
+        double total = customers.stream().mapToDouble(c -> c.printBill()).sum();
+        System.out.println("Total bill: " + total);
+    }
+
+    public void caculate() {
+        double salary = employees.stream().mapToDouble(e -> e.getSalary()).sum();
+        double bills = customers.stream().mapToDouble(c -> c.printBill()).sum();
+        double profit = bills - salary;
+        System.out.println("Profit: " + profit);
+    }
 
 }
